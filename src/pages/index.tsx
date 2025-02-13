@@ -14,7 +14,7 @@ export default function Home() {
     <>
       <section className="flex flex-row justify-center items-stretch mx-10 h-full" style={{ height: "calc(100vh - 5rem)" }}>
         <Menu toggleHistory={toggleHistory} />
-        <ChatHistory isHistoryVisible={isHistoryVisible} />
+        <ChatHistory toggleHistory={toggleHistory} isHistoryVisible={isHistoryVisible} />
         <Chat isHistoryVisible={isHistoryVisible} />
       </section>
     </>
