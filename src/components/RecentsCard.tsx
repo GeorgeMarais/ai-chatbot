@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { X } from "lucide-react";
 
-export default function ChatHistory({ isHistoryVisible, toggleHistory }: { isHistoryVisible: boolean; toggleHistory: () => void; }) {
+export default function RecentsCard({ isHistoryVisible, toggleHistory }: { isHistoryVisible: boolean; toggleHistory: () => void; }) {
     if (!isHistoryVisible) return null;
     return (
         <Card className="flex flex-col w-[25%] mx-2 border-1 border-neutral-900 backdrop-blur-sm bg-neutral-400/10">

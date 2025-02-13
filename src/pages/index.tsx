@@ -1,5 +1,5 @@
 import Menu from "@/components/Menu";
-import ChatHistory from "@/components/ChatHistory";
+import RecentsCard from "@/components/RecentsCard";
 import Chat from "@/components/Chat";
 import { useState } from "react";
 
@@ -14,7 +14,7 @@ export default function Home() {
     <>
       <section className="flex flex-row justify-center items-stretch mx-10 h-full" style={{ height: "calc(100vh - 5rem)" }}>
         <Menu toggleHistory={toggleHistory} />
-        <ChatHistory toggleHistory={toggleHistory} isHistoryVisible={isHistoryVisible} />
+        <RecentsCard toggleHistory={toggleHistory} isHistoryVisible={isHistoryVisible} />
         <Chat isHistoryVisible={isHistoryVisible} />
       </section>
     </>
