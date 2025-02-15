@@ -4,12 +4,59 @@ import { Send } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { useEffect, useRef, useState } from "react";
 import { ScrollArea } from "./ui/scroll-area";
+import { ChatMessage, StoredChat } from "@/types/chat";
 
-export default function Chat({ isHistoryVisible }: { isHistoryVisible: boolean }) {
-    const [messages, setMessages] = useState<{ text: string; from: "user" | "agent"; evaluation?: any }[]>([]);
+export default function Chat({ isHistoryVisible, onChatUpdate, selectedChatId }: { isHistoryVisible: boolean; onChatUpdate?: (chats: StoredChat[]) => void; selectedChatId?: string | null; }) {
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [chatId, setChatId] = useState<string>("");
     const [input, setInput] = useState("");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const [evaluationResults, setEvaluationResults] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (selectedChatId) {
+            const storedChats = JSON.parse(localStorage.getItem('chats') || '[]');
+            const selectedChat = storedChats.find((c: StoredChat) => c.id === selectedChatId);
+            setMessages(selectedChat?.messages || []);
+        }
+
+        if (!chatId) {
+            const newChatId = `chat_${Date.now()}`;
+            setChatId(newChatId);
+            saveChat(newChatId, []);
+        }
+    }, []);
+
+    const calculateAverageScore = (messages: ChatMessage[]): number => {
+        const scoresWithEval = messages
+            .filter(msg => msg.evaluation?.score)
+            .map(msg => parseInt(msg.evaluation!.score.replace('%', '')));
+
+        if (scoresWithEval.length === 0) return 0;
+        return Math.round(scoresWithEval.reduce((a, b) => a + b, 0) / scoresWithEval.length);
+    };
+
+    const saveChat = (id: string, chatMessages: ChatMessage[]) => {
+        const existingChats = JSON.parse(localStorage.getItem('chats') || '[]');
+        const averageScore = calculateAverageScore(chatMessages);
+
+        const chatData: StoredChat = {
+            id,
+            messages: chatMessages,
+            averageScore,
+            createdAt: existingChats.find((c: StoredChat) => c.id === id)?.createdAt || new Date().toISOString(),
+            lastUpdated: new Date().toISOString()
+        };
+
+        const updatedChats = [
+            ...existingChats.filter((c: StoredChat) => c.id !== id),
+            chatData
+        ].sort((a: StoredChat, b: StoredChat) =>
+            new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+        );
+
+        localStorage.setItem('chats', JSON.stringify(updatedChats));
+        onChatUpdate?.(updatedChats);
+    };
 
     const evaluateHelpfulness = () => {
         const score = Math.floor(Math.random() * 100);
@@ -26,28 +73,37 @@ export default function Chat({ isHistoryVisible }: { isHistoryVisible: boolean }
     const sendMessage = async () => {
         if (!input.trim()) return;
 
-        setMessages((prev) => [...prev, { text: input, from: "user" }]);
+        const newUserMessage: ChatMessage = { text: input, from: "user" };
+        const updatedMessages = [...messages, newUserMessage];
+        setMessages(updatedMessages);
+        saveChat(chatId, updatedMessages);
 
         try {
-            const response = await fetch("/_api/chat", {
+            const response = await fetch("/_api/chatAPI", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: input }),
             });
 
             const data = await response.json();
-            data.evaluation = await evaluateHelpfulness();
+            const newAgentMessage: ChatMessage = {
+                text: data.response,
+                from: "agent",
+                evaluation: evaluateHelpfulness()
+            };
 
-            setMessages((prev) => [
-                ...prev,
-                { text: data.response, from: "agent", evaluation: data.evaluation },
-            ]);
-            setEvaluationResults((prev) => [...prev, data.evaluation]);
+            const finalMessages = [...updatedMessages, newAgentMessage];
+            setMessages(finalMessages);
+            saveChat(chatId, finalMessages);
+
         } catch (error) {
-            setMessages((prev) => [
-                ...prev,
-                { text: "Could not get response from AI", from: "agent" },
-            ]);
+            const errorMessage: ChatMessage = {
+                text: "Could not get response from AI",
+                from: "agent"
+            };
+            const finalMessages = [...updatedMessages, errorMessage];
+            setMessages(finalMessages);
+            saveChat(chatId, finalMessages);
         }
 
         setInput("");
