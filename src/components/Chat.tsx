@@ -6,34 +6,18 @@ import { useEffect, useRef, useState } from "react";
 import { ScrollArea } from "./ui/scroll-area";
 import { ChatMessage, StoredChat } from "@/types/chat";
 
-export default function Chat({ isHistoryVisible, onChatUpdate, selectedChatId }: { isHistoryVisible: boolean; onChatUpdate?: (chats: StoredChat[]) => void; selectedChatId?: string | null; }) {
+interface ChatProps {
+    isHistoryVisible: boolean;
+    chats: StoredChat[];
+    onChatUpdate: (chatsOrId: StoredChat[] | string) => void;
+    selectedChatId: string | null;
+}
+
+export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedChatId }: ChatProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const [chatId, setChatId] = useState<string>("");
     const [input, setInput] = useState("");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-    useEffect(() => {
-        if (selectedChatId) {
-            const storedChats = JSON.parse(localStorage.getItem('chats') || '[]');
-            const selectedChat = storedChats.find((c: StoredChat) => c.id === selectedChatId);
-            setMessages(selectedChat?.messages || []);
-        }
-
-        if (!chatId) {
-            const newChatId = `chat_${Date.now()}`;
-            setChatId(newChatId);
-            saveChat(newChatId, []);
-        }
-    }, []);
-
-    const calculateAverageScore = (messages: ChatMessage[]): number => {
-        const scoresWithEval = messages
-            .filter(msg => msg.evaluation?.score)
-            .map(msg => parseInt(msg.evaluation!.score.replace('%', '')));
-
-        if (scoresWithEval.length === 0) return 0;
-        return Math.round(scoresWithEval.reduce((a, b) => a + b, 0) / scoresWithEval.length);
-    };
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
 
     const saveChat = (id: string, chatMessages: ChatMessage[]) => {
         const existingChats = JSON.parse(localStorage.getItem('chats') || '[]');
@@ -58,6 +42,33 @@ export default function Chat({ isHistoryVisible, onChatUpdate, selectedChatId }:
         onChatUpdate?.(updatedChats);
     };
 
+    useEffect(() => {
+        if (selectedChatId) {
+            const storedChats = JSON.parse(localStorage.getItem('chats') || '[]');
+            const selectedChat = storedChats.find((chat: StoredChat) => chat.id === selectedChatId);
+            if (selectedChat) {
+                setMessages(selectedChat.messages);
+            }
+        } else {
+            setMessages([]);
+        }
+    }, [selectedChatId]);
+
+    useEffect(() => {
+        if (scrollAreaRef.current) {
+            scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+        }
+    }, [messages]);
+
+    const calculateAverageScore = (messages: ChatMessage[]): number => {
+        const scoresWithEval = messages
+            .filter(msg => msg.evaluation?.score)
+            .map(msg => parseInt(msg.evaluation!.score.replace('%', '')));
+
+        if (scoresWithEval.length === 0) return 0;
+        return Math.round(scoresWithEval.reduce((a, b) => a + b, 0) / scoresWithEval.length);
+    };
+
     const evaluateHelpfulness = () => {
         const score = Math.floor(Math.random() * 100);
         const passed = score >= 80;
@@ -65,18 +76,23 @@ export default function Chat({ isHistoryVisible, onChatUpdate, selectedChatId }:
             result: passed ? 'Passed' : 'Failed',
             score: `${score}%`,
             explanation: passed
-                ? 'The agent’s response was helpful.'
-                : 'The agent’s response was not helpful.',
+                ? "The agent's response was helpful."
+                : "The agent's response was not helpful.",
         };
     };
 
     const sendMessage = async () => {
         if (!input.trim()) return;
 
+        const currentChatId = selectedChatId || `chat_${Date.now()}`;
+        if (!selectedChatId) {
+            onChatUpdate(currentChatId);
+            saveChat(currentChatId, messages);
+        }
+
         const newUserMessage: ChatMessage = { text: input, from: "user" };
         const updatedMessages = [...messages, newUserMessage];
         setMessages(updatedMessages);
-        saveChat(chatId, updatedMessages);
 
         try {
             const response = await fetch("/_api/chatAPI", {
@@ -94,7 +110,23 @@ export default function Chat({ isHistoryVisible, onChatUpdate, selectedChatId }:
 
             const finalMessages = [...updatedMessages, newAgentMessage];
             setMessages(finalMessages);
-            saveChat(chatId, finalMessages);
+
+            const storedChats = chats || [];
+            const updatedChats = [
+                ...storedChats.filter((c: StoredChat) => c.id !== currentChatId),
+                {
+                    id: currentChatId,
+                    messages: finalMessages,
+                    averageScore: calculateAverageScore(finalMessages),
+                    createdAt: storedChats.find((c: StoredChat) => c.id === currentChatId)?.createdAt || new Date().toISOString(),
+                    lastUpdated: new Date().toISOString()
+                }
+            ].sort((a: StoredChat, b: StoredChat) =>
+                new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+            );
+
+            onChatUpdate(updatedChats);
+            saveChat(currentChatId, finalMessages);
 
         } catch (error) {
             const errorMessage: ChatMessage = {
@@ -103,21 +135,25 @@ export default function Chat({ isHistoryVisible, onChatUpdate, selectedChatId }:
             };
             const finalMessages = [...updatedMessages, errorMessage];
             setMessages(finalMessages);
-            saveChat(chatId, finalMessages);
         }
 
         setInput("");
+        adjustHeight();
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
     };
 
     const adjustHeight = () => {
         const textarea = textareaRef.current;
         if (textarea) {
-            if (!textarea.value.trim() || !textarea.value) {
-                textarea.style.height = '24px';
-            } else {
-                textarea.style.height = 'auto';
-                textarea.style.height = `${textarea.scrollHeight}px`;
-            }
+            textarea.style.height = '24px';
+            const scrollHeight = textarea.scrollHeight;
+            textarea.style.height = scrollHeight > 144 ? '144px' : `${scrollHeight}px`;
         }
     };
 
@@ -133,9 +169,14 @@ export default function Chat({ isHistoryVisible, onChatUpdate, selectedChatId }:
     return (
         <Card className={`flex flex-col ${isHistoryVisible ? 'w-[70%]' : 'w-[95%]'} mx-2 border-1 border-neutral-900 backdrop-blur-sm bg-neutral-400/10 h-full`}>
             <CardHeader>
-                <CardTitle className="text-lg text-white">New Chat</CardTitle>
+                <CardTitle className="text-lg text-white">
+                    {selectedChatId ? 'Continue Chat' : 'New Chat'}
+                </CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col space-y-4 max-h-[80vh] overflow-y-auto">
+            <CardContent
+                className="flex flex-col space-y-4 h-[calc(100vh-16rem)] overflow-y-auto"
+                ref={scrollAreaRef}
+            >
                 {messages.map((msg, index) => (
                     <div
                         key={index}
@@ -147,7 +188,7 @@ export default function Chat({ isHistoryVisible, onChatUpdate, selectedChatId }:
                                 : 'bg-gray-700/40 text-white'
                                 }`}
                         >
-                            <div className="prose max-w-none">
+                            <div className="prose max-w-none whitespace-pre-wrap">
                                 {msg.text}
                             </div>
 
@@ -173,6 +214,7 @@ export default function Chat({ isHistoryVisible, onChatUpdate, selectedChatId }:
                             ref={textareaRef}
                             value={input}
                             onChange={handleInput}
+                            onKeyDown={handleKeyPress}
                             placeholder="Ask me a question..."
                             className="w-full p-2 text-white placeholder:text-neutral-400 bg-neutral-800/70 border-0 focus:ring-0 focus:outline-none transition-height duration-200"
                             rows={1}
@@ -181,7 +223,10 @@ export default function Chat({ isHistoryVisible, onChatUpdate, selectedChatId }:
                             }}
                         />
                     </ScrollArea>
-                    <Button onClick={sendMessage} className="w-6 h-8 mr-4 bg-[#ff8b7c] hover:bg-[#de786a] rounded-lg flex-shrink-0">
+                    <Button
+                        onClick={sendMessage}
+                        className="w-6 h-8 mr-4 bg-[#ff8b7c] hover:bg-[#de786a] rounded-lg flex-shrink-0"
+                    >
                         <Send className="text-white" />
                     </Button>
                 </div>
