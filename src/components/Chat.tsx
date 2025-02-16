@@ -2,7 +2,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Button } from "./ui/button";
 import { Loader2, Send } from "lucide-react";
 import { Textarea } from "./ui/textarea";
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ScrollArea } from "./ui/scroll-area";
 import { ChatMessage, StoredChat } from "@/types/chat";
 
