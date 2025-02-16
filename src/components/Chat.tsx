@@ -215,20 +215,21 @@ export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedCh
                             }}
                         />
                     </ScrollArea>
-                    {loading && (
+                    {loading ? (
                         <Button disabled>
                             <Loader2 className="animate-spin" />
                             Please wait
                         </Button>
-                    )}
-                    {!loading && (
-                        <Button
-                            onClick={sendMessage}
-                            className="w-6 h-8 mr-4 bg-[#ff8b7c] hover:bg-[#de786a] rounded-lg flex-shrink-0"
-                        >
-                            <Send className="text-white" />
-                        </Button>
-                    )}
+                    )
+                        : (
+                            <Button
+                                onClick={sendMessage}
+                                className="w-6 h-8 mr-4 bg-[#ff8b7c] hover:bg-[#de786a] rounded-lg flex-shrink-0"
+                            >
+                                <Send className="text-white" />
+                            </Button>
+                        )
+                    }
                 </div>
             </CardFooter>
         </Card>
