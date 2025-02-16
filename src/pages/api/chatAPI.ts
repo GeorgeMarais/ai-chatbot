@@ -23,7 +23,7 @@ export default async function messageHandler(req: NextApiRequest, res: NextApiRe
 
             res.status(200).json({ response: responseText, evaluation });
         } catch (error) {
-            res.status(500).json({ error: "Failed to generate response" });
+            res.status(500).json({ error: "Failed to generate response due to this error: " + error });
         }
     } else {
         res.setHeader("Allow", ["POST"]);
