@@ -22,6 +22,13 @@ export default function RecentsCard({ toggleHistory, onChatsUpdate, selectedChat
         onChatsUpdate([]);
     };
 
+    const handleDeleteChat = (chatId: string) => {
+        const existingChats = JSON.parse(localStorage.getItem('chats') || '[]');
+        const updatedChats = existingChats.filter((c: StoredChat) => c.id !== chatId);
+        localStorage.setItem('chats', JSON.stringify(updatedChats));
+        onChatsUpdate(updatedChats);
+    }
+
     return (
         <Card className="flex flex-col w-[25%] mx-2 border-1 border-neutral-900 backdrop-blur-sm bg-neutral-400/10">
             <CardHeader>
@@ -44,7 +51,7 @@ export default function RecentsCard({ toggleHistory, onChatsUpdate, selectedChat
                             {chats.filter((c: StoredChat) => c.id === selectedChatId).map((chat) => (
                                 <Card
                                     key={chat.id}
-                                    className="p-4 w-full bg-neutral-700/30"
+                                    className="p-4 w-full border-none bg-neutral-700/30"
                                 >
                                     <div className="flex justify-between items-start">
                                         <div>
@@ -55,7 +62,7 @@ export default function RecentsCard({ toggleHistory, onChatsUpdate, selectedChat
                                                 {chat.messages[0]?.text.substring(0, 50)}...
                                             </p>
                                         </div>
-                                        <div className="bg-blue-500/20 px-2 py-1 rounded">
+                                        <div className="bg-[#de786a]/20 text-white px-2 py-1 rounded">
                                             <span className="text-white text-xs">
                                                 {chat.averageScore}%
                                             </span>
@@ -67,23 +74,14 @@ export default function RecentsCard({ toggleHistory, onChatsUpdate, selectedChat
 
                         <section className="flex w-full justify-between items-center">
                             <p className="text-gray-200 text-xs">Chat History</p>
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={handleClearAll}
-                                            className="hover:bg-red-500/20"
-                                        >
-                                            <Trash2 className="h-5 w-5 text-red-400" />
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Clear History</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleClearAll}
+                                className="text-red-400 hover:bg-red-500/20 hover:text-white"
+                            >
+                                Clear History
+                            </Button>
                         </section>
                     </>
                 )}
@@ -94,7 +92,7 @@ export default function RecentsCard({ toggleHistory, onChatsUpdate, selectedChat
                             {chats.filter((c: StoredChat) => c.id !== selectedChatId).map((chat) => (
                                 <Card
                                     key={chat.id}
-                                    className="p-4 cursor-pointer hover:bg-neutral-700/30 w-full"
+                                    className="p-4 cursor-pointer border-none bg-gray-700/40 text-white hover:bg-neutral-700/30 w-full"
                                     onClick={() => handleSelectChat(chat.id)}
                                 >
                                     <div className="flex justify-between items-start">
@@ -106,11 +104,12 @@ export default function RecentsCard({ toggleHistory, onChatsUpdate, selectedChat
                                                 {chat.messages[0]?.text.substring(0, 50)}...
                                             </p>
                                         </div>
-                                        <div className="bg-blue-500/20 px-2 py-1 rounded">
-                                            <span className="text-white text-xs">
-                                                {chat.averageScore}%
-                                            </span>
-                                        </div>
+                                        <Button
+                                            className="bg-red-400/20 px-3 py-1 rounded"
+                                            onClick={() => { handleDeleteChat(chat.id) }}
+                                        >
+                                            <Trash2 className="h-5 w-5 text-white" />
+                                        </Button>
                                     </div>
                                 </Card>
                             ))}

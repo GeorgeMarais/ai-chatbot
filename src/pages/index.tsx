@@ -61,8 +61,8 @@ export default function Home() {
 
       <Chat
         isHistoryVisible={isHistoryVisible}
-        chats={chats}
         onChatUpdate={handleChatUpdate}
+        chats={chats}
         selectedChatId={selectedChatId}
       />
     </section>
