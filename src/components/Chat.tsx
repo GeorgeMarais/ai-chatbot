@@ -1,6 +1,6 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "./ui/button";
-import { Send } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { useEffect, useRef, useState } from "react";
 import { ScrollArea } from "./ui/scroll-area";
@@ -16,6 +16,7 @@ interface ChatProps {
 export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedChatId }: ChatProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState("");
+    const [loading, setLoading] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -72,6 +73,7 @@ export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedCh
 
     const sendMessage = async () => {
         if (!input.trim()) return;
+        setLoading(true);
 
         const currentChatId = selectedChatId || `chat_${Date.now()}`;
         if (!selectedChatId) {
@@ -128,6 +130,7 @@ export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedCh
 
         setInput("");
         adjustHeight();
+        setLoading(false);
     };
 
     const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -212,12 +215,20 @@ export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedCh
                             }}
                         />
                     </ScrollArea>
-                    <Button
-                        onClick={sendMessage}
-                        className="w-6 h-8 mr-4 bg-[#ff8b7c] hover:bg-[#de786a] rounded-lg flex-shrink-0"
-                    >
-                        <Send className="text-white" />
-                    </Button>
+                    {loading && (
+                        <Button disabled>
+                            <Loader2 className="animate-spin" />
+                            Please wait
+                        </Button>
+                    )}
+                    {!loading && (
+                        <Button
+                            onClick={sendMessage}
+                            className="w-6 h-8 mr-4 bg-[#ff8b7c] hover:bg-[#de786a] rounded-lg flex-shrink-0"
+                        >
+                            <Send className="text-white" />
+                        </Button>
+                    )}
                 </div>
             </CardFooter>
         </Card>
