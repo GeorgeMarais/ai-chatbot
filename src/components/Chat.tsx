@@ -119,7 +119,7 @@ export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedCh
 
         } catch (error) {
             const errorMessage: ChatMessage = {
-                text: "Could not get response from AI",
+                text: "Could not get response from AI due to this error: " + error,
                 from: "agent"
             };
             const finalMessages = [...updatedMessages, errorMessage];

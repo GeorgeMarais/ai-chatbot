@@ -1,4 +1,5 @@
 import { Html, Head, Main, NextScript } from "next/document";
+import Image from "next/image";
 import React from "react";
 
 export default function Document() {
@@ -12,9 +13,8 @@ export default function Document() {
       </Head>
       <body className="antialiased h-full max-w-[2000px]">
         <header className="flex justify-left items-center py-5 px-12">
-          <img className="w-auto h-7 relative object-contain block dark:hidden" src="https://mintlify.s3.us-west-1.amazonaws.com/maihem-29/logo/MAIHEM_Bittersweet_Full_Logo.svg" alt="light logo" />
-          <img className="w-auto h-7 relative object-contain hidden dark:block" src="https://mintlify.s3.us-west-1.amazonaws.com/maihem-29/logo/MAIHEM_Bittersweet_Full_Logo.svg" alt="dark logo" />
-          {/* Add Shadcn toggle for dark and light mode */}
+          <Image className="w-auto h-7 relative object-contain block dark:hidden" src="https://mintlify.s3.us-west-1.amazonaws.com/maihem-29/logo/MAIHEM_Bittersweet_Full_Logo.svg" alt="light logo" />
+          <Image className="w-auto h-7 relative object-contain hidden dark:block" src="https://mintlify.s3.us-west-1.amazonaws.com/maihem-29/logo/MAIHEM_Bittersweet_Full_Logo.svg" alt="dark logo" />
         </header>
         <Main />
         <NextScript />

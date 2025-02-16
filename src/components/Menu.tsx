@@ -1,4 +1,4 @@
-import { MessageCirclePlus, FileClock, Sun, Moon } from "lucide-react";
+import { MessageCirclePlus, FileClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Card, CardContent } from "@/components/ui/card";
