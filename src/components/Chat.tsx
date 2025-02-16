@@ -126,6 +126,8 @@ export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedCh
             };
             const finalMessages = [...updatedMessages, errorMessage];
             setMessages(finalMessages);
+        } finally {
+            setLoading(false);
         }
 
         setInput("");
@@ -172,7 +174,7 @@ export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedCh
                 {messages.map((msg, index) => (
                     <div
                         key={index}
-                        className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"} min-h-fit`}
+                        className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"} min-h-fit animate-fade-in`}
                     >
                         <div
                             className={`rounded p-3 max-w-[60%] text-sm ${msg.from === "user"
@@ -198,6 +200,18 @@ export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedCh
                         </div>
                     </div>
                 ))}
+
+                {loading && (
+                    <div className="flex justify-start min-h-fit">
+                        <div className="rounded p-3 max-w-[60%] text-sm bg-gray-700/40 text-white animate-pulse">
+                            <div className="flex items-center space-x-2">
+                                <div className="w-2 h-2 bg-white rounded-full animate-bounce" />
+                                <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:0.2s]" />
+                                <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:0.4s]" />
+                            </div>
+                        </div>
+                    </div>
+                )}
             </CardContent>
             <CardFooter className="mt-auto pb-4">
                 <div className="flex items-center w-full min-h-[60px] bg-neutral-800/70 border-0 rounded-lg">
