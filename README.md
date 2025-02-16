@@ -1,40 +1,127 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# Maihem Chat Application
 
-## Getting Started
+I spent time thinking about how I creatively wanted to approach this and decided that I will utilise Maihem's current theme to showcase the type and quality of solutions I would create if I get the opportunity to join you. I thoroughly enjoyed building this and as someone who is perfectionistic, I spent a bit more time on ensuring that the foundation of this application was very robust.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Core Functionality
+- Real-time chat interface with AI responses powered by Azure OpenAI as per the specification.
+- Persistent chat history using localStorage. I decided to use localstorage instead of Redis or a database due to the current scale of the MVP, but built it in a way which caters to easy conversion to such solutions.
+- Conversation quality scoring and evaluation using a random number generator.
+
+### User Interface Components
+
+#### Menu Bar
+- Minimalist side menu for essential actions which has space for more options.
+- Quick access buttons for new chat and history toggle.
+- Tooltip-enhanced navigation for better UX.
+
+#### Chat Interface
+- Dynamic message display with user/AI message differentiation.
+- Auto-expanding textarea for message input.
+- Automatic scroll-to-bottom on new messages.
+- Message evaluation display with quality metrics.
+
+#### Recent Chats Panel
+- Collapsible panel for recent chats/chat history.
+- Current chat overview with quality score and associated colour highlight for above and below 50%.
+- Individual chat deletion.
+- Bulk history clearing option.
+
+## Technical Architecture
+
+### Component Structure
+- `Chat.tsx`: Main chat interface component
+- `RecentsCard.tsx`: Chat history management component
+- `Menu.tsx`: Navigation and controls component
+- `Home.tsx`: Main page component managing state and layout
+
+### State Management
+- Uses React's useState for local state management.
+- Implements useEffect for side effects and localStorage synchronization.
+- Centralized chat state management through the Home component.
+
+### Data Flow
+```
+Home
+├── Menu (Controls)
+├── RecentsCard (History)
+└── Chat (Main Interface)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Storage
+- Utilizes localStorage for persistent chat storage
+- Chat data structure:
+  ```typescript
+  interface StoredChat {
+    id: string;
+    messages: ChatMessage[];
+    averageScore: number;
+    createdAt: string;
+    lastUpdated: string;
+  }
+  ```
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## Design Decisions
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+### UI/UX
+1. Dark Mode First
+   - Implemented with a dark colour scheme matching that of other Maihem websites
+   - High contrast for better readability
+   - Accent colours for important actions (#ff8b7c, #de786a)
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+2. Three-Panel Layout
+   - Menu: Compact side panel for essential actions
+   - Chat History: Collapsible panel for recent conversations
+   - Main Chat: Expandable chat interface
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Visual Feedback
+   - Quality scores with colour coding (green/red)
+   - Tooltips for better feature discovery
+   - Smooth transitions and hover states
 
-## Learn More
+### Technical Choices
 
-To learn more about Next.js, take a look at the following resources:
+1. Component Architecture
+   - Modular design with clear separation of concerns
+   - Props-based communication between components
+   - Centralized state management in Home component
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+2. Performance Considerations
+   - Efficient message rendering with unique keys
+   - Scroll optimization for large chat histories
+   - Debounced textarea resizing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. Error Handling
+   - Fallbacks for API failures
+   - Clear error messaging
+   - Persistent storage recovery
 
-## Deploy on Vercel
+### AI Integration
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Message Evaluation
+   - Mocked quality scoring of AI responses
+   - Percentage-based scoring system
+   - Clear success/failure indicators
+   - Mocked explanatory feedback for each response
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+2. Azure OpenAI Integration
+   - Configurable endpoint and API settings
+   - Error handling for API failures
+   - Response formatting and processing
+
+## Setup and Configuration
+
+### Environment Variables
+```
+OPENAI_ENDPOINT=your_azure_endpoint
+OPENAI_API_KEY=your_api_key
+OPENAI_DEPLOYMENT=your_deployment_name
+```
+
+### Required Dependencies
+- Next.js 13+
+- React 18+
+- Lucide React (for icons)
+- Tailwind CSS (for styling)
+- ShadcnUI components

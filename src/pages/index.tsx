@@ -19,7 +19,7 @@ export default function Home() {
   };
 
   const handleChatUpdate = (updatedChats: StoredChat[] | string) => {
-    if (typeof updatedChats === 'string') {
+    if (typeof updatedChats === "string") {
       setSelectedChatId(updatedChats);
     } else {
       setChats(updatedChats);
@@ -33,7 +33,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const storedChats = JSON.parse(localStorage.getItem('chats') || '[]');
+    const storedChats = JSON.parse(localStorage.getItem("chats") || "[]");
     setChats(storedChats);
 
     if (storedChats.length > 0) {

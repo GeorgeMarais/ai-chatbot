@@ -5,7 +5,7 @@ const openai = new AzureOpenAI({
     endpoint: process.env.OPENAI_ENDPOINT,
     apiKey: process.env.OPENAI_API_KEY,
     apiVersion: "2024-08-01-preview",
-    deployment: "4o-mini",
+    deployment: process.env.OPENAI_DEPLOYMENT,
 });
 
 export default async function messageHandler(req: NextApiRequest, res: NextApiResponse) {
@@ -43,10 +43,10 @@ const evaluateHelpfulness = (response: string) => {
     const score = Math.floor(Math.random() * 100);
     const passed = score >= 80;
     return {
-        result: passed ? 'Passed' : 'Failed',
+        result: passed ? "Passed" : "Failed",
         score: `${score}%`,
         explanation: passed
-            ? 'The agent’s response was helpful.'
-            : 'The agent’s response was not helpful.',
+            ? "The agent’s response was helpful."
+            : "The agent’s response was not helpful.",
     };
 }

@@ -20,7 +20,7 @@ export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedCh
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
     const saveChat = (id: string, chatMessages: ChatMessage[]) => {
-        const existingChats = JSON.parse(localStorage.getItem('chats') || '[]');
+        const existingChats = JSON.parse(localStorage.getItem("chats") || "[]");
         const averageScore = calculateAverageScore(chatMessages);
 
         const chatData: StoredChat = {
@@ -38,13 +38,13 @@ export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedCh
             new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
         );
 
-        localStorage.setItem('chats', JSON.stringify(updatedChats));
+        localStorage.setItem("chats", JSON.stringify(updatedChats));
         onChatUpdate?.(updatedChats);
     };
 
     useEffect(() => {
         if (selectedChatId) {
-            const storedChats = JSON.parse(localStorage.getItem('chats') || '[]');
+            const storedChats = JSON.parse(localStorage.getItem("chats") || "[]");
             const selectedChat = storedChats.find((chat: StoredChat) => chat.id === selectedChatId);
             if (selectedChat) {
                 setMessages(selectedChat.messages);
@@ -60,25 +60,14 @@ export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedCh
         }
     }, [messages]);
 
+    // Calculate average score of all messages to determine conversation quality
     const calculateAverageScore = (messages: ChatMessage[]): number => {
         const scoresWithEval = messages
             .filter(msg => msg.evaluation?.score)
-            .map(msg => parseInt(msg.evaluation!.score.replace('%', '')));
+            .map(msg => parseInt(msg.evaluation!.score.replace("%", "")));
 
         if (scoresWithEval.length === 0) return 0;
         return Math.round(scoresWithEval.reduce((a, b) => a + b, 0) / scoresWithEval.length);
-    };
-
-    const evaluateHelpfulness = () => {
-        const score = Math.floor(Math.random() * 100);
-        const passed = score >= 80;
-        return {
-            result: passed ? 'Passed' : 'Failed',
-            score: `${score}%`,
-            explanation: passed
-                ? "The agent's response was helpful."
-                : "The agent's response was not helpful.",
-        };
     };
 
     const sendMessage = async () => {
@@ -95,7 +84,7 @@ export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedCh
         setMessages(updatedMessages);
 
         try {
-            const response = await fetch("/_api/chatAPI", {
+            const response = await fetch("/api/chatAPI", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: input }),
@@ -105,7 +94,7 @@ export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedCh
             const newAgentMessage: ChatMessage = {
                 text: data.response,
                 from: "agent",
-                evaluation: evaluateHelpfulness()
+                evaluation: data.evaluation
             };
 
             const finalMessages = [...updatedMessages, newAgentMessage];
@@ -142,7 +131,7 @@ export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedCh
     };
 
     const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
+        if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
             sendMessage();
         }
@@ -151,9 +140,9 @@ export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedCh
     const adjustHeight = () => {
         const textarea = textareaRef.current;
         if (textarea) {
-            textarea.style.height = '24px';
+            textarea.style.height = "24px";
             const scrollHeight = textarea.scrollHeight;
-            textarea.style.height = scrollHeight > 144 ? '144px' : `${scrollHeight}px`;
+            textarea.style.height = scrollHeight > 144 ? "144px" : `${scrollHeight}px`;
         }
     };
 
@@ -167,10 +156,10 @@ export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedCh
     }, []);
 
     return (
-        <Card className={`flex flex-col ${isHistoryVisible ? 'w-[70%]' : 'w-[95%]'} mx-2 border-1 border-neutral-900 backdrop-blur-sm bg-neutral-400/10 h-full`}>
+        <Card className={`flex flex-col ${isHistoryVisible ? "w-[70%]" : "w-[95%]"} mx-2 border-1 border-neutral-900 backdrop-blur-sm bg-neutral-400/10 h-full`}>
             <CardHeader>
                 <CardTitle className="text-lg text-white">
-                    {selectedChatId ? 'Continue Chat' : 'New Chat'}
+                    {selectedChatId ? "Continue Chat" : "New Chat"}
                 </CardTitle>
             </CardHeader>
             <CardContent
@@ -180,25 +169,25 @@ export default function Chat({ isHistoryVisible, chats, onChatUpdate, selectedCh
                 {messages.map((msg, index) => (
                     <div
                         key={index}
-                        className={`flex ${msg.from === 'user' ? 'justify-end' : 'justify-start'} min-h-fit`}
+                        className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"} min-h-fit`}
                     >
                         <div
-                            className={`rounded p-3 max-w-[60%] text-sm ${msg.from === 'user'
-                                ? 'bg-[#de786a]/20 text-white'
-                                : 'bg-gray-700/40 text-white'
+                            className={`rounded p-3 max-w-[60%] text-sm ${msg.from === "user"
+                                ? "bg-[#de786a]/20 text-white"
+                                : "bg-gray-700/40 text-white"
                                 }`}
                         >
                             <div className="prose max-w-none whitespace-pre-wrap">
                                 {msg.text}
                             </div>
-
+                            {msg.from === "agent" && (<hr className="my-4 border-neutral-600" />)}
                             {msg.evaluation && (
                                 <div className="mt-2 text-xs space-y-1">
-                                    <div className="flex flex-row justify-between text-white/90">
-                                        <p className="flex flex-col">Result: {msg.evaluation.result}</p>
+                                    <div className="flex flex-row justify-between text-neutral-300">
+                                        <p className={`flex flex-col ${msg.evaluation.result === "Failed" ? "text-red-400" : "text-green-400"}`}>Result: {msg.evaluation.result}</p>
                                         <p className="flex flex-col">Score: {msg.evaluation.score}</p>
                                     </div>
-                                    <div className="flex flex-row text-white/90">
+                                    <div className="flex flex-row text-neutral-300">
                                         <p>Explanation: {msg.evaluation.explanation}</p>
                                     </div>
                                 </div>

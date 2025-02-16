@@ -18,14 +18,14 @@ export default function RecentsCard({ toggleHistory, onChatsUpdate, selectedChat
     };
 
     const handleClearAll = () => {
-        localStorage.setItem('chats', '[]');
+        localStorage.setItem("chats", "[]");
         onChatsUpdate([]);
     };
 
     const handleDeleteChat = (chatId: string) => {
-        const existingChats = JSON.parse(localStorage.getItem('chats') || '[]');
+        const existingChats = JSON.parse(localStorage.getItem("chats") || "[]");
         const updatedChats = existingChats.filter((c: StoredChat) => c.id !== chatId);
-        localStorage.setItem('chats', JSON.stringify(updatedChats));
+        localStorage.setItem("chats", JSON.stringify(updatedChats));
         onChatsUpdate(updatedChats);
     }
 
@@ -56,17 +56,26 @@ export default function RecentsCard({ toggleHistory, onChatsUpdate, selectedChat
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <h3 className="text-white text-sm font-medium">
-                                                {new Date(chat.createdAt).toLocaleDateString()}
+                                                {chat.messages[0]?.text.substring(0, 50)}...
                                             </h3>
                                             <p className="text-gray-400 text-xs">
-                                                {chat.messages[0]?.text.substring(0, 50)}...
+                                                {new Date(chat.createdAt).toLocaleDateString()}
                                             </p>
                                         </div>
-                                        <div className="bg-[#de786a]/20 text-white px-2 py-1 rounded">
-                                            <span className="text-white text-xs">
-                                                {chat.averageScore}%
-                                            </span>
-                                        </div>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <div className={`${chat.averageScore > 50 ? "bg-green-400/20" : "bg-[#de786a]/20"} text-white px-2 py-1 rounded`}>
+                                                        <span className="text-white text-xs">
+                                                            {chat.averageScore}%
+                                                        </span>
+                                                    </div>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>Conversation Quality</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
                                     </div>
                                 </Card>
                             ))}
@@ -98,10 +107,10 @@ export default function RecentsCard({ toggleHistory, onChatsUpdate, selectedChat
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <h3 className="text-white text-sm font-medium">
-                                                {new Date(chat.createdAt).toLocaleDateString()}
+                                                {chat.messages[0]?.text.substring(0, 50)}...
                                             </h3>
                                             <p className="text-gray-400 text-xs">
-                                                {chat.messages[0]?.text.substring(0, 50)}...
+                                                {new Date(chat.createdAt).toLocaleDateString()}
                                             </p>
                                         </div>
                                         <Button
