@@ -1,8 +1,6 @@
-# Maihem Chat Application
+# AI Chat Application
 
 I spent time thinking about how I creatively wanted to approach this and decided that I will utilise Maihem's current theme to showcase the type and quality of solutions I would create if I get the opportunity to join you. I thoroughly enjoyed building this and as someone who is perfectionistic, I spent a bit more time on ensuring that the foundation of this application was very robust.
-
-**The Live Vercel Deployed Application can be found here:** [Maihem Chat](https://maihem-chat.vercel.app/)
 
 ## Features
 
