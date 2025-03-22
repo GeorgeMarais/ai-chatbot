@@ -2,7 +2,8 @@
 
 I spent time thinking about how I creatively wanted to approach this and decided that I will utilise Maihem's current theme to showcase the type and quality of solutions I would create if I get the opportunity to join you. I thoroughly enjoyed building this and as someone who is perfectionistic, I spent a bit more time on ensuring that the foundation of this application was very robust.
 
-**The chat app can be accessed vie this link:**
+**The chat app can be accessed vie this link:** https://aichat9000.vercel.app/
+*Note: for the purposes of ensuring to not incur any fees, the chatbot's OpenAI config has been disabled.*
 
 ## Features
 
